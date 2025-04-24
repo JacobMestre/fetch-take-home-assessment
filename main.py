@@ -7,6 +7,8 @@ import uuid
 
 api = FastAPI()
 
+receipts_db = {}
+
 class Item(BaseModel):
     shortDescription: str = Field(..., pattern=r"^[\w\s\-]+$", description = "The short product description for the item.")
     price: str = Field(..., pattern = r"^\d+\.\d{2}$", description= "The total price paid for this item.")
@@ -61,4 +63,14 @@ def process_receipt(receipt: Receipt):
         points += 10
     print(f"After Rule 7: {points} points")
 
-    return points
+    receipt_id = uuid.uuid4()
+
+    receipts_db[receipt_id] = points
+
+    return {"id": str(receipt_id)}
+
+
+@api.get('/receipts/{id}/points')
+def get_points(id: str):
+    receipt_id = uuid.UUID(id)
+    return {"points": receipts_db[receipt_id]}
