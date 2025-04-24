@@ -4,10 +4,10 @@ from typing import List
 import uuid
 
 class Receipt(BaseModel):
-    #retailer
+    retailer: str = Field(..., pattern=r"^[\w\s\-&]+$", description = "The name of the retailer or store the receipt is from")
     #purchaseDate 
     #purchaseTime
-    #items (min of 1)
+    # items: 
     #total 
 
 class Item(BaseModel):
