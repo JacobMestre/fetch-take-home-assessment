@@ -36,36 +36,29 @@ def process_receipt(receipt: Receipt):
     for character in receipt.retailer:
         if character.isalnum():
             points += 1
-    print(f"After Rule 1: {points} points")
     # Rule 2: 50 points if the total is a round dollar amount
     if float(receipt.total).is_integer():
         points += 50
-    print(f"After Rule 2: {points} points")
     # Rule 3: 25 points if the total is a multiple of 0.25
     if float(receipt.total) % 0.25 == 0:
         points += 25
-    print(f"After Rule 3: {points} points")
     # Rule 4: 5 points for every 2 items on the receipt
     points += 5* (len(receipt.items) // 2)
-    print(f"After Rule 4: {points} points")
 
     # Rule 5: If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
     for item in receipt.items:
         stripped = item.shortDescription.strip()
         if len(stripped) % 3 == 0:
             points += ceil(float(item.price) * 0.2)
-    print(f"After Rule 5: {points} points")
     
     # Rule 6: 6 points if the day in the purchase date is odd.
     if receipt.purchaseDate.day % 2 == 1:
         points += 6
-    print(f"After Rule 6: {points} points")
     
     # Rule 7: 10 points if purchase is after 2:00PM and before 4:00pm
 
     if time(14,0) < receipt.purchaseTime < time(16,0):
         points += 10
-    print(f"After Rule 7: {points} points")
 
     receipt_id = uuid.uuid4()
 
