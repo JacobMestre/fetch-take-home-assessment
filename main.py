@@ -1,4 +1,8 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
+from fastapi.exception_handlers import request_validation_exception_handler
 from pydantic import BaseModel, Field
 from typing import List
 from datetime import date, time
@@ -70,7 +74,23 @@ def process_receipt(receipt: Receipt):
     return {"id": str(receipt_id)}
 
 
+
+@api.exception_handler(RequestValidationError)
+async def custom_request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "The receipt is invalid. Please verify input."}
+    )
+
+
+
 @api.get('/receipts/{id}/points')
 def get_points(id: str):
-    receipt_id = uuid.UUID(id)
+    try: 
+        receipt_id = uuid.UUID(id)
+    except ValueError:
+        raise HTTPException(status_code = 400, detail = "The receipt is invalid.")
+    
+    if receipt_id not in receipts_db:
+        raise HTTPException(status_code = 404, detail = "No receipt found for that ID.")
     return {"points": receipts_db[receipt_id]}
